@@ -1,0 +1,35 @@
+version: '3'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+
+  fastapi:
+    build:
+      context: ./backend
+    container_name: backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.15.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  load_data:
+    build:
+      context: ./load-data-to-es  
+    container_name: load_data
+    volumes:
+      - ./patent_jsons/patent_jsons:/app/patent_jsons  
+    depends_on:
+      - elasticsearch
