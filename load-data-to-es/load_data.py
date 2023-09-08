@@ -5,12 +5,28 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
 
-time.sleep(60)
-es = Elasticsearch([{'host': 'elasticsearch', 'port': 9200}])
 
-index_name = "patents" 
+def get_elasticsearch():
+    es = None
+    tries = 0
+    while tries != 100:
+        es = Elasticsearch([{'host': 'elasticsearch', 'port': 9200}])
+        try:
+            if es.ping() == True:
+                print("ES Running")
+                return es
+        except Exception as e:
+            tries += 1
+            print(f"Connection to ES failed for {tries} time. Retrying in 10 seconds")
+            time.sleep(10)
+
+    return es
+
 
 def load_data_from_directory(directory):
+
+    es = get_elasticsearch()
+    index_name = "patents"
     actions = []
 
     for filename in os.listdir(directory):
