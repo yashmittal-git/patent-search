@@ -6,9 +6,9 @@ app = FastAPI()
 # Initialize Elasticsearch client
 es = Elasticsearch([{'host': 'elasticsearch', 'port': 9200}])
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+# @app.get("/")
+# async def root():
+#     return {"message": "Hello World"}
 
 @app.get('/search')
 async def search_documents(keyword: str = "keyword"):
@@ -25,4 +25,7 @@ async def search_documents(keyword: str = "keyword"):
         ]
     })
 
-    return results
+    hits = results.get('hits', {}).get('hits',[])
+    documents = [hit['_source'] for hit in hits]
+
+    return documents
